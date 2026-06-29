@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Learning in Public — James Howard</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f12;
+    --surface: #161920;
+    --surface2: #1e2230;
+    --surface3: #252a3a;
+    --border: #2a2f42;
+    --border2: #363d54;
+    --text: #e8eaf0;
+    --text2: #9aa0b8;
+    --text3: #5a6080;
+    --accent: #4f7cff;
+    --accent2: #7b5cf0;
+    --green: #3dd68c;
+    --amber: #f5a623;
+    --red: #f05252;
+    --teal: #22d3c8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(13,15,18,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    padding: 0 2rem;
+    height: 52px;
+    gap: 0;
+  }
+
+  .nav-brand {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+    margin-right: auto;
+  }
+
+  .nav-brand span { color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    padding: 120px 2rem 80px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 strong { font-weight: 600; color: var(--accent); }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--text2);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* TOPIC GRID */
+  .topics-section {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 0 2rem 100px;
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .topic-card {
+    background: var(--surface);
+    padding: 1.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    transition: background 0.2s;
+    text-decoration: none;
+    color: inherit;
+    position: relative;
+  }
+
+  .topic-card:not(.locked):hover {
+    background: var(--surface2);
+  }
+
+  .topic-card.locked {
+    cursor: default;
+  }
+
+  .topic-number {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+  }
+
+  .topic-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+
+  .topic-card.locked .topic-title {
+    color: var(--text3);
+  }
+
+  .topic-desc {
+    font-size: 0.82rem;
+    color: var(--text2);
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .topic-card.locked .topic-desc {
+    color: var(--text3);
+  }
+
+  .topic-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0.25rem;
+  }
+
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .badge-green { background: rgba(61,214,140,0.1); color: var(--green); border: 1px solid rgba(61,214,140,0.25); }
+  .badge-amber { background: rgba(245,166,35,0.1); color: var(--amber); border: 1px solid rgba(245,166,35,0.25); }
+  .badge-dim { background: rgba(90,96,128,0.1); color: var(--text3); border: 1px solid var(--border); }
+
+  .topic-arrow {
+    font-size: 14px;
+    color: var(--text3);
+    transition: color 0.2s, transform 0.2s;
+  }
+
+  .topic-card:not(.locked):hover .topic-arrow {
+    color: var(--accent);
+    transform: translateX(3px);
+  }
+
+  .topic-card.locked .topic-arrow {
+    display: none;
+  }
+
+  /* TOPICS LIST (weeks) */
+  .week-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  /* SUBTOPICS */
+  .topic-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.25rem;
+  }
+
+  .tag {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 1px 6px;
+  }
+
+  .topic-card.locked .tag {
+    opacity: 0.5;
+  }
+
+  /* FADE IN */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-brand" href="/">james<span>.</span>learn</a>
+</nav>
+
+<div class="hero fade-in">
+  <div class="eyebrow">Learning in public</div>
+  <h1>Things I'm learning<br><strong>about how the web works</strong></h1>
+  <p class="hero-sub">Interactive guides built while working through web fundamentals — from how a local server works to system design patterns used in production.</p>
+</div>
+
+<div class="topics-section">
+  <div class="section-label">Topics</div>
+
+  <div class="topic-grid fade-in">
+
+    <a class="topic-card" href="./how-the-web-works/">
+      <div class="topic-number">01</div>
+      <div class="topic-title">How the Web Works</div>
+      <div class="topic-desc">Local servers, HTTP, headers, caching, origins, ports, CDNs, and DNS — from localhost to production.</div>
+      <div class="topic-tags">
+        <span class="tag">HTTP</span>
+        <span class="tag">DNS</span>
+        <span class="tag">CDN</span>
+        <span class="tag">Cache-Control</span>
+      </div>
+      <div class="topic-footer">
+        <span class="badge badge-green">complete</span>
+        <span class="topic-arrow">→</span>
+      </div>
+    </a>
+
+    <div class="topic-card locked">
+      <div class="topic-number">02</div>
+      <div class="topic-title">The Network Layer</div>
+      <div class="topic-desc">TCP handshakes, HTTP/2 multiplexing, TLS certificates, WebSockets, and why REST and GraphQL make different trade-offs.</div>
+      <div class="topic-tags">
+        <span class="tag">TCP</span>
+        <span class="tag">TLS</span>
+        <span class="tag">HTTP/2</span>
+        <span class="tag">WebSockets</span>
+      </div>
+      <div class="topic-footer">
+        <span class="badge badge-dim">coming soon</span>
+      </div>
+    </div>
+
+    <div class="topic-card locked">
+      <div class="topic-number">03</div>
+      <div class="topic-title">Auth &amp; Security</div>
+      <div class="topic-desc">Cookies, sessions, JWTs, OAuth 2.0, CSRF, XSS, and a deep dive into CORS preflight requests.</div>
+      <div class="topic-tags">
+        <span class="tag">JWT</span>
+        <span class="tag">OAuth</span>
+        <span class="tag">CORS</span>
+        <span class="tag">CSRF</span>
+      </div>
+      <div class="topic-footer">
+        <span class="badge badge-dim">coming soon</span>
+      </div>
+    </div>
+
+    <div class="topic-card locked">
+      <div class="topic-number">04</div>
+      <div class="topic-title">Databases &amp; APIs</div>
+      <div class="topic-desc">SQL indexes, relational vs NoSQL, pagination patterns, job queues, and the N+1 problem ORMs hide.</div>
+      <div class="topic-tags">
+        <span class="tag">SQL</span>
+        <span class="tag">Postgres</span>
+        <span class="tag">REST</span>
+        <span class="tag">Queues</span>
+      </div>
+      <div class="topic-footer">
+        <span class="badge badge-dim">coming soon</span>
+      </div>
+    </div>
+
+    <div class="topic-card locked">
+      <div class="topic-number">05</div>
+      <div class="topic-title">Frontend Performance</div>
+      <div class="topic-desc">The browser rendering pipeline, JS loading strategies, image formats, bundle analysis, and Core Web Vitals.</div>
+      <div class="topic-tags">
+        <span class="tag">CWV</span>
+        <span class="tag">LCP</span>
+        <span class="tag">Vite</span>
+        <span class="tag">Rendering</span>
+      </div>
+      <div class="topic-footer">
+        <span class="badge badge-dim">coming soon</span>
+      </div>
+    </div>
+
+    <div class="topic-card locked">
+      <div class="topic-number">06</div>
+      <div class="topic-title">Infrastructure &amp; Deployment</div>
+      <div class="topic-desc">CI/CD pipelines, Docker containers, secrets management, feature flags, and production observability.</div>
+      <div class="topic-tags">
+        <span class="tag">Docker</span>
+        <span class="tag">CI/CD</span>
+        <span class="tag">GitHub Actions</span>
+      </div>
+      <div class="topic-footer">
+        <span class="badge badge-dim">coming soon</span>
+      </div>
+    </div>
+
+    <div class="topic-card locked">
+      <div class="topic-number">07</div>
+      <div class="topic-title">System Design</div>
+      <div class="topic-desc">Load balancing, microservices vs monolith, rate limiting, real-time systems, and end-to-end feature design.</div>
+      <div class="topic-tags">
+        <span class="tag">Scaling</span>
+        <span class="tag">SSE</span>
+        <span class="tag">Idempotency</span>
+      </div>
+      <div class="topic-footer">
+        <span class="badge badge-dim">coming soon</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<footer>
+  james howard · learning in public · built with plain html
+</footer>
+
+<script>
+  const fadeObs = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+  }, { threshold: 0.05 });
+
+  document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+</script>
+</body>
+</html>

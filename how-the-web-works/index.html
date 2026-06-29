@@ -1,0 +1,1795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How the Web Works — An Interactive Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Inter:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d0f12;
+    --surface: #161920;
+    --surface2: #1e2230;
+    --surface3: #252a3a;
+    --border: #2a2f42;
+    --border2: #363d54;
+    --text: #e8eaf0;
+    --text2: #9aa0b8;
+    --text3: #5a6080;
+    --accent: #4f7cff;
+    --accent2: #7b5cf0;
+    --green: #3dd68c;
+    --amber: #f5a623;
+    --red: #f05252;
+    --teal: #22d3c8;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'Inter', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: rgba(13,15,18,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 0 2rem;
+    height: 52px;
+    overflow-x: auto;
+  }
+
+  nav a {
+    color: var(--text3);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    padding: 0 1rem;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  nav a:hover { color: var(--text); }
+  nav a.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+  /* HERO */
+  .hero {
+    padding: 120px 2rem 80px;
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 strong { font-weight: 600; color: var(--accent); }
+
+  .hero-sub {
+    font-size: 1.05rem;
+    color: var(--text2);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  .chapter-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2.5rem;
+  }
+
+  .chapter-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text2);
+    font-family: var(--sans);
+    font-size: 13px;
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+    display: inline-block;
+  }
+
+  .chapter-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(79,124,255,0.08);
+  }
+
+  /* SECTIONS */
+  section {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 80px 2rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .section-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  h2 {
+    font-size: clamp(1.4rem, 3vw, 2rem);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    margin-bottom: 1rem;
+    line-height: 1.2;
+  }
+
+  .lead {
+    font-size: 1rem;
+    color: var(--text2);
+    margin-bottom: 2rem;
+    max-width: 620px;
+    line-height: 1.75;
+  }
+
+  /* CARDS */
+  .card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+
+  .card {
+    background: var(--surface);
+    padding: 1.5rem;
+    transition: background 0.2s;
+  }
+
+  .card:hover { background: var(--surface2); }
+
+  .card-icon {
+    font-size: 1.4rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .card h3 {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--text);
+  }
+
+  .card p {
+    font-size: 0.82rem;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  /* CODE */
+  .code-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 1.5rem 0;
+  }
+
+  .code-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+  }
+
+  .code-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    letter-spacing: 0.06em;
+  }
+
+  .copy-btn {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text3);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .copy-btn:hover { background: var(--border); color: var(--text); }
+
+  pre {
+    padding: 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.8;
+    overflow-x: auto;
+    color: var(--text);
+  }
+
+  .hl-green { color: var(--green); }
+  .hl-amber { color: var(--amber); }
+  .hl-blue { color: var(--accent); }
+  .hl-teal { color: var(--teal); }
+  .hl-red { color: var(--red); }
+  .hl-dim { color: var(--text3); }
+
+  /* INTERACTIVE DEMOS */
+  .demo-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    margin: 2rem 0;
+  }
+
+  .demo-header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .demo-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--border2);
+  }
+
+  .demo-title {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+  }
+
+  .demo-body {
+    padding: 1.5rem;
+  }
+
+  /* REQUEST SIMULATOR */
+  .sim-url-bar {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    align-items: center;
+  }
+
+  .sim-url-bar input {
+    flex: 1;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.6rem 1rem;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .sim-url-bar input:focus { border-color: var(--accent); }
+
+  .btn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 0.6rem 1.25rem;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .btn:hover { background: #3a6de8; }
+  .btn:active { transform: scale(0.98); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text2);
+    border-radius: 8px;
+    padding: 0.6rem 1.25rem;
+    font-family: var(--sans);
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-ghost:hover { border-color: var(--border2); color: var(--text); }
+
+  .sim-flow {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 1rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .sim-node {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.9rem;
+    font-size: 12px;
+    text-align: center;
+    min-width: 90px;
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+
+  .sim-node .node-label {
+    font-weight: 500;
+    margin-bottom: 2px;
+  }
+
+  .sim-node .node-sub {
+    font-size: 10px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  .sim-node.active-hit { border-color: var(--green); background: rgba(61,214,140,0.08); }
+  .sim-node.active-miss { border-color: var(--amber); background: rgba(245,166,35,0.08); }
+  .sim-node.active-origin { border-color: var(--accent); background: rgba(79,124,255,0.08); }
+  .sim-node.active-dead { border-color: var(--red); background: rgba(240,82,82,0.08); opacity: 0.6; }
+
+  .sim-arrow {
+    width: 32px;
+    height: 2px;
+    background: var(--border2);
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.3s;
+  }
+
+  .sim-arrow::after {
+    content: '';
+    position: absolute;
+    right: -1px;
+    top: -3px;
+    width: 0; height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 6px solid var(--border2);
+    transition: border-left-color 0.3s;
+  }
+
+  .sim-arrow.active { background: var(--green); }
+  .sim-arrow.active::after { border-left-color: var(--green); }
+  .sim-arrow.blocked { background: var(--red); }
+  .sim-arrow.blocked::after { border-left-color: var(--red); }
+
+  .sim-log {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    min-height: 80px;
+    color: var(--text2);
+    line-height: 1.8;
+  }
+
+  .log-green { color: var(--green); }
+  .log-amber { color: var(--amber); }
+  .log-blue { color: var(--accent); }
+  .log-red { color: var(--red); }
+  .log-dim { color: var(--text3); }
+
+  /* ORIGIN BUILDER */
+  .origin-builder {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+    align-items: center;
+  }
+
+  .origin-piece {
+    border-radius: 6px;
+    padding: 0.35rem 0.75rem;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+  }
+
+  .origin-piece.proto { background: rgba(123,92,240,0.15); color: var(--accent2); border-color: rgba(123,92,240,0.3); }
+  .origin-piece.domain { background: rgba(34,211,200,0.1); color: var(--teal); border-color: rgba(34,211,200,0.25); }
+  .origin-piece.port { background: rgba(245,166,35,0.1); color: var(--amber); border-color: rgba(245,166,35,0.25); }
+  .origin-piece.path { background: rgba(90,96,128,0.15); color: var(--text3); border-color: var(--border); }
+  .origin-piece.ignored { opacity: 0.4; text-decoration: line-through; }
+
+  .origin-result {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    margin-top: 1rem;
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+
+  /* CACHE CONTROL EXPLORER */
+  .cc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  @media (max-width: 600px) { .cc-grid { grid-template-columns: 1fr; } }
+
+  .cc-option {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .cc-option:hover { border-color: var(--border2); }
+  .cc-option.selected { border-color: var(--accent); background: rgba(79,124,255,0.08); }
+
+  .cc-option h4 {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--accent);
+    margin-bottom: 0.4rem;
+  }
+
+  .cc-option p {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.5;
+  }
+
+  .cc-preview {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.8;
+    min-height: 72px;
+    transition: all 0.3s;
+  }
+
+  /* PORT DEMO */
+  .port-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+  }
+
+  .port-row:last-child { border-bottom: none; }
+
+  .port-tag {
+    font-family: var(--mono);
+    font-size: 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 8px;
+    min-width: 60px;
+    text-align: center;
+  }
+
+  .port-tag.reserved { color: var(--red); border-color: rgba(240,82,82,0.3); background: rgba(240,82,82,0.08); }
+  .port-tag.free { color: var(--green); border-color: rgba(61,214,140,0.3); background: rgba(61,214,140,0.08); }
+
+  .port-bar-wrap {
+    flex: 1;
+    height: 6px;
+    background: var(--border);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .port-bar {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.6s ease;
+  }
+
+  /* TIMELINE */
+  .timeline {
+    position: relative;
+    padding-left: 2rem;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 6px;
+    bottom: 6px;
+    width: 2px;
+    background: var(--border);
+  }
+
+  .tl-item {
+    position: relative;
+    padding-bottom: 2rem;
+  }
+
+  .tl-item:last-child { padding-bottom: 0; }
+
+  .tl-dot {
+    position: absolute;
+    left: -1.85rem;
+    top: 4px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 2px solid var(--surface);
+    background: var(--border2);
+    transition: all 0.3s;
+  }
+
+  .tl-item.done .tl-dot { background: var(--green); border-color: var(--green); box-shadow: 0 0 0 4px rgba(61,214,140,0.15); }
+  .tl-item.current .tl-dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px rgba(79,124,255,0.2); }
+
+  .tl-title {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+  }
+
+  .tl-desc {
+    font-size: 13px;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  /* ANALOGY CARDS */
+  .analogy-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0;
+  }
+
+  @media (max-width: 580px) { .analogy-grid { grid-template-columns: 1fr; } }
+
+  .analogy-card {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+
+  .analogy-top {
+    padding: 1rem;
+    background: var(--surface2);
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--mono);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .analogy-bottom {
+    padding: 1rem;
+    background: var(--surface);
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.6;
+  }
+
+  .analogy-bottom strong { color: var(--text); font-weight: 500; }
+
+  /* PILL BADGE */
+  .badge {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 100px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
+  .badge-green { background: rgba(61,214,140,0.1); color: var(--green); border: 1px solid rgba(61,214,140,0.25); }
+  .badge-red { background: rgba(240,82,82,0.1); color: var(--red); border: 1px solid rgba(240,82,82,0.25); }
+  .badge-amber { background: rgba(245,166,35,0.1); color: var(--amber); border: 1px solid rgba(245,166,35,0.25); }
+  .badge-blue { background: rgba(79,124,255,0.1); color: var(--accent); border: 1px solid rgba(79,124,255,0.25); }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  /* CALLOUT */
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: rgba(79,124,255,0.06);
+    border-radius: 0 8px 8px 0;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.7;
+  }
+
+  .callout strong { color: var(--text); }
+
+  .callout.amber { border-left-color: var(--amber); background: rgba(245,166,35,0.06); }
+  .callout.green { border-left-color: var(--green); background: rgba(61,214,140,0.06); }
+
+  /* TOOLTIP */
+  [data-tip] {
+    position: relative;
+    cursor: help;
+    border-bottom: 1px dashed var(--text3);
+  }
+
+  [data-tip]:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface3);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 0.5rem 0.75rem;
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+    z-index: 10;
+    pointer-events: none;
+    font-style: normal;
+  }
+
+  /* FOOTER */
+  footer {
+    text-align: center;
+    padding: 3rem 2rem;
+    border-top: 1px solid var(--border);
+    font-size: 12px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  /* SCROLL ANIMATIONS */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .fade-in.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* CACHE STATUS BAR */
+  .cache-status-bar {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .status-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.3rem 0.75rem;
+    font-size: 12px;
+    color: var(--text2);
+    font-family: var(--mono);
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--border2);
+    transition: background 0.3s;
+  }
+
+  .status-dot.on { background: var(--green); }
+  .status-dot.warn { background: var(--amber); }
+  .status-dot.off { background: var(--red); }
+
+  /* RANGE INPUT */
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 2px;
+    background: var(--border);
+    outline: none;
+  }
+
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.2); }
+
+  select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 0.4rem 0.75rem;
+    font-family: var(--sans);
+    font-size: 13px;
+    outline: none;
+    cursor: pointer;
+  }
+
+  select:focus { border-color: var(--accent); }
+
+  /* cdn map */
+  .cdn-map {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    justify-content: space-between;
+    margin: 1.5rem 0;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+  }
+
+  .cdn-node {
+    text-align: center;
+    flex-shrink: 0;
+  }
+
+  .cdn-circle {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin: 0 auto 0.4rem;
+    transition: all 0.4s;
+    background: var(--surface2);
+  }
+
+  .cdn-node-label {
+    font-size: 11px;
+    color: var(--text3);
+    font-family: var(--mono);
+  }
+
+  .cdn-line {
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    min-width: 20px;
+    position: relative;
+    transition: background 0.4s;
+  }
+
+  .cdn-circle.warm { border-color: var(--green); background: rgba(61,214,140,0.1); box-shadow: 0 0 12px rgba(61,214,140,0.2); }
+  .cdn-circle.active { border-color: var(--accent); background: rgba(79,124,255,0.1); }
+  .cdn-line.active { background: var(--accent); }
+  .cdn-line.cached { background: var(--green); }
+
+  .sim-controls {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+  }
+</style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <a href="../" style="border-right:1px solid var(--border);margin-right:0.5rem;padding-right:1.5rem;">← All topics</a>
+  <a href="#server" class="active">Server</a>
+  <a href="#http">HTTP</a>
+  <a href="#headers">Headers</a>
+  <a href="#origin">Origin</a>
+  <a href="#ports">Ports</a>
+  <a href="#cache">Cache</a>
+  <a href="#cdn">CDN</a>
+  <a href="#dns">DNS</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="eyebrow">Interactive Guide</div>
+  <h1>How the web works<br><strong>from localhost to CDN</strong></h1>
+  <p class="hero-sub">Everything we covered — local servers, HTTP, headers, caching, origins, ports, CDNs, and DNS — in one place you can click through and explore.</p>
+  <div class="chapter-nav">
+    <a href="#server" class="chapter-btn">What is a server?</a>
+    <a href="#http" class="chapter-btn">HTTP request lifecycle</a>
+    <a href="#headers" class="chapter-btn">Headers</a>
+    <a href="#origin" class="chapter-btn">Same-origin policy</a>
+    <a href="#ports" class="chapter-btn">Ports</a>
+    <a href="#cache" class="chapter-btn">Cache-Control</a>
+    <a href="#cdn" class="chapter-btn">CDN cache</a>
+    <a href="#dns" class="chapter-btn">DNS</a>
+  </div>
+</div>
+
+<!-- SECTION 1: SERVER -->
+<section id="server">
+  <div class="section-label">Chapter 01</div>
+  <h2>What does "server" actually mean?</h2>
+  <p class="lead">The word server is doing double duty. It refers to a physical machine and to a piece of software. Most confusion comes from mixing those two up.</p>
+
+  <div class="analogy-grid fade-in">
+    <div class="analogy-card">
+      <div class="analogy-top">Server as hardware</div>
+      <div class="analogy-bottom">A computer in a data center — <strong>always on, public IP, high capacity</strong>. Just a regular computer with a job description.</div>
+    </div>
+    <div class="analogy-card">
+      <div class="analogy-top">Server as software</div>
+      <div class="analogy-bottom">A program that <strong>listens on a port, receives requests, and sends responses</strong>. Can run anywhere — data center, your laptop, a Raspberry Pi.</div>
+    </div>
+  </div>
+
+  <div class="callout green fade-in">
+    <strong>The mom explanation:</strong> Think of a restaurant. The kitchen is the computer. The waiter is the server software. Your browser is the customer. The same waiter works in a tiny pop-up (your laptop) or a huge chain (Twitter's data center). Same concept, wildly different scale.
+  </div>
+
+  <div class="demo-box fade-in">
+    <div class="demo-header">
+      <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+      <span class="demo-title">Try it — start your own server</span>
+    </div>
+    <div class="demo-body">
+      <p style="font-size:13px; color: var(--text2); margin-bottom: 1rem;">Pick your tool and run this in your terminal, from any folder you want to serve.</p>
+      <div style="display:flex; gap:0.5rem; margin-bottom:1rem; flex-wrap:wrap;">
+        <button class="btn-ghost" onclick="showCmd('python')" id="tab-python" style="border-color:var(--accent);color:var(--accent)">Python</button>
+        <button class="btn-ghost" onclick="showCmd('node')" id="tab-node">Node</button>
+        <button class="btn-ghost" onclick="showCmd('custom')" id="tab-custom">Custom headers</button>
+      </div>
+      <div class="code-block">
+        <div class="code-header">
+          <span class="code-label" id="cmd-label">terminal</span>
+          <button class="copy-btn" onclick="copyCode('cmd-code')">copy</button>
+        </div>
+        <pre id="cmd-code"><span class="hl-dim"># Navigate to the folder you want to serve</span>
+<span class="hl-green">cd</span> ~/my-project
+
+<span class="hl-dim"># Start a server on port 8080</span>
+<span class="hl-green">python3</span> -m http.server <span class="hl-amber">8080</span>
+
+<span class="hl-dim"># Open your browser to:</span>
+<span class="hl-blue">http://localhost:8080</span></pre>
+      </div>
+      <div class="callout amber" style="margin-top:0.5rem;">
+        <strong>What's localhost?</strong> A hardcoded alias for <code style="font-family:var(--mono);font-size:12px">127.0.0.1</code> — a reserved IP that means "this machine talking to itself." Never leaves your computer.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 2: HTTP -->
+<section id="http">
+  <div class="section-label">Chapter 02</div>
+  <h2>The HTTP request lifecycle</h2>
+  <p class="lead">Every time your browser loads something, it sends a structured text message to a server and gets a structured text message back. HTTP is just a protocol — an agreed format for those messages.</p>
+
+  <div class="demo-box fade-in">
+    <div class="demo-header">
+      <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+      <span class="demo-title">Request simulator — watch what happens step by step</span>
+    </div>
+    <div class="demo-body">
+      <div class="sim-url-bar">
+        <input type="text" id="sim-url" value="http://localhost:8080/index.html" placeholder="Enter a URL...">
+        <button class="btn" onclick="simulateRequest()">Send request</button>
+        <button class="btn-ghost" onclick="resetSim()">Reset</button>
+      </div>
+
+      <div class="sim-flow" id="sim-flow">
+        <div class="sim-node" id="sn-browser">
+          <div class="node-label">Browser</div>
+          <div class="node-sub">you</div>
+        </div>
+        <div class="sim-arrow" id="sa-1"></div>
+        <div class="sim-node" id="sn-cache">
+          <div class="node-label">Browser cache</div>
+          <div class="node-sub">local disk</div>
+        </div>
+        <div class="sim-arrow" id="sa-2"></div>
+        <div class="sim-node" id="sn-server">
+          <div class="node-label">Server</div>
+          <div class="node-sub">localhost:8080</div>
+        </div>
+        <div class="sim-arrow" id="sa-3"></div>
+        <div class="sim-node" id="sn-disk">
+          <div class="node-label">Disk</div>
+          <div class="node-sub">your files</div>
+        </div>
+      </div>
+
+      <div class="sim-log" id="sim-log">
+        <span class="log-dim">// Hit "Send request" to simulate the lifecycle</span>
+      </div>
+
+      <div style="margin-top:1rem; display:flex; gap:0.75rem; flex-wrap:wrap; align-items:center;">
+        <label style="font-size:12px; color:var(--text2);">
+          <input type="checkbox" id="cache-enabled" checked style="margin-right:4px"> Cache enabled
+        </label>
+        <label style="font-size:12px; color:var(--text2);">
+          <input type="checkbox" id="server-alive" checked style="margin-right:4px"> Server running
+        </label>
+        <label style="font-size:12px; color:var(--text2);">
+          <input type="checkbox" id="cached-already" style="margin-right:4px"> Page already cached
+        </label>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block fade-in">
+    <div class="code-header">
+      <span class="code-label">raw HTTP — what the browser actually sends</span>
+    </div>
+    <pre><span class="hl-green">GET</span> <span class="hl-amber">/index.html</span> <span class="hl-teal">HTTP/1.1</span>
+<span class="hl-blue">Host:</span> localhost:8080
+<span class="hl-blue">Accept:</span> text/html
+<span class="hl-blue">Connection:</span> keep-alive
+<span class="hl-dim">                          ← blank line separates headers from body
+</span>
+<span class="hl-dim">--- server responds ---</span>
+
+<span class="hl-teal">HTTP/1.1</span> <span class="hl-green">200 OK</span>
+<span class="hl-blue">Content-Type:</span> text/html
+<span class="hl-blue">Cache-Control:</span> max-age=3600
+<span class="hl-dim">                          ← blank line separates headers from body
+</span><span class="hl-dim">&lt;html&gt;...&lt;/html&gt;</span>        <span class="hl-dim">← the actual file</span></pre>
+  </div>
+</section>
+
+<!-- SECTION 3: HEADERS -->
+<section id="headers">
+  <div class="section-label">Chapter 03</div>
+  <h2>HTTP headers</h2>
+  <p class="lead">Headers are metadata that travel alongside a request or response — separate from the content itself. Think of them as the label on the outside of a shipping package.</p>
+
+  <div class="card-grid fade-in">
+    <div class="card">
+      <div class="card-icon">📤</div>
+      <h3>Request headers</h3>
+      <p>Browser → Server. Who's asking, what they accept, cookies they carry, and how they want the response.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📥</div>
+      <h3>Response headers</h3>
+      <p>Server → Browser. What type of content it is, how to cache it, what cookies to set, security rules to apply.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔑</div>
+      <h3>Format</h3>
+      <p>Always plain text key-value pairs. <code style="font-family:var(--mono);font-size:11px">Key: Value</code>. A blank line separates headers from the body.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🐍</div>
+      <h3>Setting them in Python</h3>
+      <p>Subclass <code style="font-family:var(--mono);font-size:11px">SimpleHTTPRequestHandler</code> and override <code style="font-family:var(--mono);font-size:11px">end_headers()</code> to inject your own.</p>
+    </div>
+  </div>
+
+  <div class="demo-box fade-in">
+    <div class="demo-header">
+      <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+      <span class="demo-title">Cache-Control explorer — click to see what each directive does</span>
+    </div>
+    <div class="demo-body">
+      <div class="cc-grid">
+        <div class="cc-option" onclick="selectCC('max-age')">
+          <h4>max-age=3600</h4>
+          <p>Cache this file. Treat it as fresh for this many seconds before re-requesting.</p>
+        </div>
+        <div class="cc-option" onclick="selectCC('no-cache')">
+          <h4>no-cache</h4>
+          <p>Store it, but always check the server before using the cached copy.</p>
+        </div>
+        <div class="cc-option" onclick="selectCC('no-store')">
+          <h4>no-store</h4>
+          <p>Never store this anywhere. Request fresh from server every single time.</p>
+        </div>
+        <div class="cc-option" onclick="selectCC('public')">
+          <h4>public</h4>
+          <p>CDNs and browsers are both allowed to cache this file.</p>
+        </div>
+        <div class="cc-option" onclick="selectCC('private')">
+          <h4>private</h4>
+          <p>Browser only. CDN must not cache this — it's user-specific.</p>
+        </div>
+        <div class="cc-option" onclick="selectCC('stale')">
+          <h4>stale-while-revalidate</h4>
+          <p>Serve the stale copy instantly, fetch a fresh one in the background.</p>
+        </div>
+      </div>
+      <div class="cc-preview" id="cc-preview">
+        <span style="color:var(--text3)">// Select a directive above to see the HTTP header and what it means</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="code-block fade-in">
+    <div class="code-header">
+      <span class="code-label">python — custom headers server</span>
+      <button class="copy-btn" onclick="copyCode('python-server')">copy</button>
+    </div>
+    <pre id="python-server"><span class="hl-blue">from</span> http.server <span class="hl-blue">import</span> SimpleHTTPRequestHandler, HTTPServer
+
+<span class="hl-blue">class</span> <span class="hl-teal">CachedHandler</span>(SimpleHTTPRequestHandler):
+    <span class="hl-blue">def</span> <span class="hl-green">end_headers</span>(self):
+        self.<span class="hl-amber">send_header</span>(<span class="hl-red">"Cache-Control"</span>, <span class="hl-red">"max-age=3600"</span>)
+        self.<span class="hl-amber">send_header</span>(<span class="hl-red">"X-Custom-Header"</span>, <span class="hl-red">"hello"</span>)
+        <span class="hl-blue">super</span>().<span class="hl-amber">end_headers</span>()
+
+HTTPServer((<span class="hl-red">""</span>, <span class="hl-amber">8080</span>), CachedHandler).<span class="hl-green">serve_forever</span>()</pre>
+  </div>
+</section>
+
+<!-- SECTION 4: ORIGIN -->
+<section id="origin">
+  <div class="section-label">Chapter 04</div>
+  <h2>Origins and the Same-Origin Policy</h2>
+  <p class="lead">An origin is three things: protocol + domain + port. Change any one of them and you have a different origin. The browser uses this to enforce security boundaries between sites.</p>
+
+  <div class="demo-box fade-in">
+    <div class="demo-header">
+      <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+      <span class="demo-title">Origin builder — click pieces to toggle and see what makes origins match</span>
+    </div>
+    <div class="demo-body">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:1rem;font-family:var(--mono)">URL A (reference origin)</p>
+      <div class="origin-builder">
+        <span class="origin-piece proto">https://</span>
+        <span class="origin-piece domain">twitter.com</span>
+        <span class="origin-piece port">:443</span>
+        <span class="origin-piece path">/home</span>
+      </div>
+
+      <hr class="divider">
+
+      <p style="font-size:12px;color:var(--text3);margin-bottom:1rem;font-family:var(--mono)">URL B — click to change each piece</p>
+      <div class="origin-builder" id="origin-b">
+        <span class="origin-piece proto" id="ob-proto" onclick="cycleProto()" style="cursor:pointer" title="click to change">https://</span>
+        <span class="origin-piece domain" id="ob-domain" onclick="cycleDomain()" style="cursor:pointer" title="click to change">twitter.com</span>
+        <span class="origin-piece port" id="ob-port" onclick="cyclePort()" style="cursor:pointer" title="click to change">:443</span>
+        <span class="origin-piece path ignored">/messages</span>
+      </div>
+
+      <div class="origin-result" id="origin-result">
+        <span class="badge badge-green">same origin</span>
+        <span style="margin-left:0.75rem;color:var(--text2);font-size:12px">All three pieces match — browser allows cross-communication</span>
+      </div>
+
+      <p style="font-size:12px;color:var(--text3);margin-top:1rem;">The path (<code style="font-family:var(--mono)">/home</code>, <code style="font-family:var(--mono)">/messages</code>) is always ignored when comparing origins.</p>
+    </div>
+  </div>
+
+  <div class="callout fade-in">
+    <strong>Why file:// breaks everything:</strong> When you open an HTML file directly, each file is its own origin. Scripts can't talk to other files because they're all "different senders." A local HTTP server gives everything one shared origin — <code style="font-family:var(--mono);font-size:12px">http://localhost:8080</code> — so fetch(), ES modules, and cookies all work.
+  </div>
+</section>
+
+<!-- SECTION 5: PORTS -->
+<section id="ports">
+  <div class="section-label">Chapter 05</div>
+  <h2>Ports</h2>
+  <p class="lead">Every machine has 65,535 ports. Think of them as parking spots — not permanently owned, just grabbed on demand. One process per spot at a time.</p>
+
+  <div class="demo-box fade-in">
+    <div class="demo-header">
+      <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+      <span class="demo-title">Port zones — drag to explore</span>
+    </div>
+    <div class="demo-body">
+      <div style="margin-bottom:1.5rem;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text3);font-family:var(--mono);margin-bottom:0.5rem;">
+          <span>0</span><span>1023</span><span>49151</span><span>65535</span>
+        </div>
+        <div style="height:24px;border-radius:6px;overflow:hidden;display:flex;">
+          <div style="width:1.6%;background:rgba(240,82,82,0.5);border-right:1px solid var(--bg)"></div>
+          <div style="width:74%;background:rgba(61,214,140,0.2)"></div>
+          <div style="width:24.4%;background:rgba(90,96,128,0.2)"></div>
+        </div>
+        <div style="display:flex;gap:1.5rem;margin-top:0.75rem;flex-wrap:wrap;">
+          <span style="font-size:12px;color:var(--red);">■ 0–1023: protected (need sudo)</span>
+          <span style="font-size:12px;color:var(--green);">■ 1024–49151: registered / free-for-all</span>
+          <span style="font-size:12px;color:var(--text3);">■ 49152–65535: ephemeral</span>
+        </div>
+      </div>
+
+      <div class="port-row">
+        <span class="port-tag reserved">80</span>
+        <span style="font-size:13px;flex:1">HTTP default — browsers assume this for <code style="font-family:var(--mono);font-size:12px">http://</code></span>
+        <span class="badge badge-red">protected</span>
+      </div>
+      <div class="port-row">
+        <span class="port-tag reserved">443</span>
+        <span style="font-size:13px;flex:1">HTTPS default — browsers assume this for <code style="font-family:var(--mono);font-size:12px">https://</code></span>
+        <span class="badge badge-red">protected</span>
+      </div>
+      <div class="port-row">
+        <span class="port-tag free">3000</span>
+        <span style="font-size:13px;flex:1">Node / React dev servers</span>
+        <span class="badge badge-green">free</span>
+      </div>
+      <div class="port-row">
+        <span class="port-tag free">5173</span>
+        <span style="font-size:13px;flex:1">Vite default</span>
+        <span class="badge badge-green">free</span>
+      </div>
+      <div class="port-row">
+        <span class="port-tag free">8080</span>
+        <span style="font-size:13px;flex:1">Generic HTTP, Python dev server</span>
+        <span class="badge badge-green">free</span>
+      </div>
+      <div class="port-row">
+        <span class="port-tag free">5432</span>
+        <span style="font-size:13px;flex:1">Postgres</span>
+        <span class="badge badge-green">free</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout amber fade-in">
+    <strong>Ports are released instantly.</strong> Kill your Python server and port 8080 is immediately free. No cleanup. It's a parking spot — you leave, someone else can pull in.
+  </div>
+</section>
+
+<!-- SECTION 6: CACHE -->
+<section id="cache">
+  <div class="section-label">Chapter 06</div>
+  <h2>Caching layers</h2>
+  <p class="lead">A cache is a saved copy of something so you don't have to fetch it again. There are four layers, each positioned closer to the user than the one before it.</p>
+
+  <div class="demo-box fade-in">
+    <div class="demo-header">
+      <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+      <span class="demo-title">Cache layer simulator</span>
+    </div>
+    <div class="demo-body">
+      <div class="cache-status-bar" id="cache-status-bar">
+        <div class="status-chip"><div class="status-dot" id="dot-browser"></div>Browser cache</div>
+        <div class="status-chip"><div class="status-dot" id="dot-cdn"></div>CDN cache</div>
+        <div class="status-chip"><div class="status-dot" id="dot-server"></div>Server cache</div>
+        <div class="status-chip"><div class="status-dot" id="dot-db"></div>DB cache</div>
+      </div>
+
+      <div class="timeline" id="cache-timeline">
+        <div class="tl-item" id="tl-browser">
+          <div class="tl-dot"></div>
+          <div class="tl-title">Browser cache <span class="badge badge-blue" style="margin-left:0.5rem">on your disk</span></div>
+          <div class="tl-desc">Checks local cache first. If hit → serve immediately. If miss → next layer.</div>
+        </div>
+        <div class="tl-item" id="tl-cdn">
+          <div class="tl-dot"></div>
+          <div class="tl-title">CDN edge cache <span class="badge badge-blue" style="margin-left:0.5rem">nearest city</span></div>
+          <div class="tl-desc">Checks edge node. If hit → serve from nearby server. If miss → next layer.</div>
+        </div>
+        <div class="tl-item" id="tl-server">
+          <div class="tl-dot"></div>
+          <div class="tl-title">Server cache (Redis) <span class="badge badge-blue" style="margin-left:0.5rem">data center</span></div>
+          <div class="tl-desc">Checks in-memory store. Avoids hitting the database for repeated queries.</div>
+        </div>
+        <div class="tl-item" id="tl-db">
+          <div class="tl-dot"></div>
+          <div class="tl-title">Database cache <span class="badge badge-blue" style="margin-left:0.5rem">built-in</span></div>
+          <div class="tl-desc">DB caches frequent query results internally. If miss → read from disk. Slowest.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:0.5rem;margin-top:1.5rem;flex-wrap:wrap;">
+        <button class="btn" onclick="animateCacheLayers(0)">Cache hit at browser</button>
+        <button class="btn" onclick="animateCacheLayers(1)">CDN cache hit</button>
+        <button class="btn" onclick="animateCacheLayers(2)">Redis cache hit</button>
+        <button class="btn" onclick="animateCacheLayers(3)">Full miss — hits DB</button>
+        <button class="btn-ghost" onclick="resetCacheLayers()">Reset</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 7: CDN -->
+<section id="cdn">
+  <div class="section-label">Chapter 07</div>
+  <h2>How a CDN cache works</h2>
+  <p class="lead">A CDN puts copies of your files on servers around the world. Users get files from the nearest location instead of your one origin server. First request populates the edge. Every request after that is served locally.</p>
+
+  <div class="demo-box fade-in">
+    <div class="demo-header">
+      <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+      <span class="demo-title">CDN request simulator</span>
+    </div>
+    <div class="demo-body">
+      <div class="sim-controls">
+        <select id="user-location">
+          <option value="atlanta">User in Atlanta</option>
+          <option value="london">User in London</option>
+          <option value="tokyo">User in Tokyo</option>
+        </select>
+        <button class="btn" onclick="simulateCDN()">Make request</button>
+        <button class="btn-ghost" onclick="warmCDN()">Warm all edges</button>
+        <button class="btn-ghost" onclick="resetCDN()">Reset CDN</button>
+      </div>
+
+      <div class="cdn-map" id="cdn-map">
+        <div class="cdn-node">
+          <div class="cdn-circle" id="cdn-user">🧑‍💻</div>
+          <div class="cdn-node-label">User</div>
+        </div>
+        <div class="cdn-line" id="cdn-l1"></div>
+        <div class="cdn-node">
+          <div class="cdn-circle" id="cdn-edge">🏙️</div>
+          <div class="cdn-node-label" id="cdn-edge-label">Edge node</div>
+        </div>
+        <div class="cdn-line" id="cdn-l2"></div>
+        <div class="cdn-node">
+          <div class="cdn-circle" id="cdn-origin">🖥️</div>
+          <div class="cdn-node-label">Origin server</div>
+        </div>
+      </div>
+
+      <div class="sim-log" id="cdn-log">
+        <span class="log-dim">// Select a user location and hit "Make request"</span>
+      </div>
+
+      <div style="margin-top:1rem;font-size:12px;color:var(--text3);">
+        Edge cache state: 
+        <span id="cdn-atlanta-state" class="badge badge-red" style="margin:0 4px">Atlanta: cold</span>
+        <span id="cdn-london-state" class="badge badge-red" style="margin:0 4px">London: cold</span>
+        <span id="cdn-tokyo-state" class="badge badge-red" style="margin:0 4px">Tokyo: cold</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout fade-in">
+    <strong>Cache busting with fingerprinting:</strong> Vite and webpack rename your files on every build — <code style="font-family:var(--mono);font-size:12px">main.a3f9.js</code> → <code style="font-family:var(--mono);font-size:12px">main.b81d.js</code>. New filename = new cache entry. No CDN purge needed. Your HTML always points to the new file, and the old one expires naturally.
+  </div>
+</section>
+
+<!-- SECTION 8: DNS -->
+<section id="dns">
+  <div class="section-label">Chapter 08</div>
+  <h2>DNS — the internet's phone book</h2>
+  <p class="lead">You type twitter.com. The internet speaks in IP addresses. DNS translates between the two — every single time, in milliseconds, invisibly.</p>
+
+  <div class="demo-box fade-in">
+    <div class="demo-header">
+      <div class="demo-dot"></div><div class="demo-dot"></div><div class="demo-dot"></div>
+      <span class="demo-title">DNS lookup simulator</span>
+    </div>
+    <div class="demo-body">
+      <div class="sim-url-bar">
+        <input type="text" id="dns-input" value="twitter.com" placeholder="Enter a domain...">
+        <button class="btn" onclick="simulateDNS()">Look up</button>
+      </div>
+
+      <div class="timeline" id="dns-timeline">
+        <div class="tl-item" id="dns-1">
+          <div class="tl-dot"></div>
+          <div class="tl-title">Check local cache</div>
+          <div class="tl-desc" id="dns-desc-1">OS checks if it already resolved this recently</div>
+        </div>
+        <div class="tl-item" id="dns-2">
+          <div class="tl-dot"></div>
+          <div class="tl-title">Ask recursive resolver</div>
+          <div class="tl-desc" id="dns-desc-2">Your ISP's DNS server — it knows or goes to find out</div>
+        </div>
+        <div class="tl-item" id="dns-3">
+          <div class="tl-dot"></div>
+          <div class="tl-title">Root → TLD → authoritative</div>
+          <div class="tl-desc" id="dns-desc-3">Chain of name servers narrows down to the right answer</div>
+        </div>
+        <div class="tl-item" id="dns-4">
+          <div class="tl-dot"></div>
+          <div class="tl-title">IP returned</div>
+          <div class="tl-desc" id="dns-desc-4">Browser connects to that IP on port 443</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="analogy-grid fade-in">
+    <div class="analogy-card">
+      <div class="analogy-top">What you type</div>
+      <div class="analogy-bottom"><strong>twitter.com</strong> — human-readable, easy to remember</div>
+    </div>
+    <div class="analogy-card">
+      <div class="analogy-top">What the internet uses</div>
+      <div class="analogy-bottom"><strong>104.244.42.65</strong> — machine-readable IP address</div>
+    </div>
+    <div class="analogy-card">
+      <div class="analogy-top">localhost is special</div>
+      <div class="analogy-bottom">Hardcoded in your OS to always be <strong>127.0.0.1</strong>. Skips DNS entirely — never leaves your machine.</div>
+    </div>
+    <div class="analogy-card">
+      <div class="analogy-top">Ports are invisible</div>
+      <div class="analogy-bottom"><strong>https://</strong> silently adds <strong>:443</strong>. You only see ports when they're non-default, like <strong>localhost:8080</strong>.</div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div style="margin-bottom:0.5rem;color:var(--text2)">Everything covered in one place</div>
+  server → http → headers → origin → ports → cache → cdn → dns
+</footer>
+
+<script>
+// NAV ACTIVE STATE
+const sections = document.querySelectorAll('section');
+const navLinks = document.querySelectorAll('nav a');
+
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navLinks.forEach(a => a.classList.remove('active'));
+      const id = e.target.id;
+      const link = document.querySelector(`nav a[href="#${id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { threshold: 0.3 });
+
+sections.forEach(s => observer.observe(s));
+
+// FADE IN
+const fadeObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => fadeObs.observe(el));
+
+// COPY CODE
+function copyCode(id) {
+  const text = document.getElementById(id).innerText;
+  navigator.clipboard.writeText(text).catch(() => {});
+  event.target.textContent = 'copied!';
+  setTimeout(() => event.target.textContent = 'copy', 1500);
+}
+
+// SERVER COMMAND TABS
+const cmds = {
+  python: {
+    label: 'terminal — python3',
+    code: `<span class="hl-dim"># Navigate to folder</span>\n<span class="hl-green">cd</span> ~/my-project\n\n<span class="hl-dim"># Start server</span>\n<span class="hl-green">python3</span> -m http.server <span class="hl-amber">8080</span>\n\n<span class="hl-dim"># Visit:</span>\n<span class="hl-blue">http://localhost:8080</span>`
+  },
+  node: {
+    label: 'terminal — node',
+    code: `<span class="hl-dim"># No install needed — npx fetches on the fly</span>\n<span class="hl-green">npx</span> serve <span class="hl-amber">.</span>\n\n<span class="hl-dim"># Or with a specific port:</span>\n<span class="hl-green">npx</span> serve . <span class="hl-amber">-l 8080</span>\n\n<span class="hl-dim"># Visit:</span>\n<span class="hl-blue">http://localhost:3000</span>`
+  },
+  custom: {
+    label: 'python — custom headers',
+    code: `<span class="hl-blue">from</span> http.server <span class="hl-blue">import</span> SimpleHTTPRequestHandler, HTTPServer\n\n<span class="hl-blue">class</span> <span class="hl-teal">CachedHandler</span>(SimpleHTTPRequestHandler):\n    <span class="hl-blue">def</span> <span class="hl-green">end_headers</span>(self):\n        self.<span class="hl-amber">send_header</span>(<span class="hl-red">"Cache-Control"</span>, <span class="hl-red">"max-age=3600"</span>)\n        <span class="hl-blue">super</span>().<span class="hl-amber">end_headers</span>()\n\nHTTPServer((<span class="hl-red">""</span>, <span class="hl-amber">8080</span>), CachedHandler).<span class="hl-green">serve_forever</span>()`
+  }
+};
+
+function showCmd(key) {
+  document.getElementById('cmd-label').textContent = cmds[key].label;
+  document.getElementById('cmd-code').innerHTML = cmds[key].code;
+  ['python','node','custom'].forEach(k => {
+    const btn = document.getElementById('tab-'+k);
+    btn.style.borderColor = k === key ? 'var(--accent)' : '';
+    btn.style.color = k === key ? 'var(--accent)' : '';
+  });
+}
+
+// REQUEST SIMULATOR
+let simRunning = false;
+
+function log(html) {
+  const el = document.getElementById('sim-log');
+  el.innerHTML += (el.innerHTML ? '\n' : '') + html;
+}
+
+function setNode(id, cls) {
+  const el = document.getElementById(id);
+  el.className = 'sim-node ' + (cls || '');
+}
+
+function setArrow(id, cls) {
+  const el = document.getElementById(id);
+  el.className = 'sim-arrow ' + (cls || '');
+}
+
+async function wait(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+async function simulateRequest() {
+  if (simRunning) return;
+  simRunning = true;
+  const cacheEnabled = document.getElementById('cache-enabled').checked;
+  const serverAlive = document.getElementById('server-alive').checked;
+  const cachedAlready = document.getElementById('cached-already').checked;
+  const url = document.getElementById('sim-url').value;
+
+  document.getElementById('sim-log').innerHTML = '';
+  resetSimNodes();
+
+  log(`<span class="log-dim">→ ${url}</span>`);
+  await wait(400);
+
+  setNode('sn-browser', 'active-origin');
+  log(`<span class="log-blue">browser</span> preparing GET request`);
+  await wait(500);
+
+  setArrow('sa-1', 'active');
+  setNode('sn-cache', 'active-origin');
+
+  if (cacheEnabled && cachedAlready) {
+    await wait(400);
+    log(`<span class="log-green">✓ cache hit</span> — serving from browser cache`);
+    setNode('sn-cache', 'active-hit');
+    setArrow('sa-1', '');
+    setNode('sn-browser', 'active-hit');
+    log(`<span class="log-green">200</span> <span class="log-dim">served in ~0ms (cached)</span>`);
+    simRunning = false;
+    return;
+  }
+
+  log(`<span class="log-amber">cache miss</span> — checking server`);
+  await wait(500);
+
+  setArrow('sa-2', 'active');
+  setNode('sn-server', 'active-origin');
+
+  if (!serverAlive) {
+    await wait(400);
+    log(`<span class="log-red">✗ connection refused</span> — nothing listening on that port`);
+    setNode('sn-server', 'active-dead');
+    setArrow('sa-2', 'blocked');
+    log(`<span class="log-red">ERR_CONNECTION_REFUSED</span> — site can't be reached`);
+    simRunning = false;
+    return;
+  }
+
+  await wait(400);
+  log(`<span class="log-blue">server</span> received request, reading file from disk`);
+  setArrow('sa-3', 'active');
+  setNode('sn-disk', 'active-origin');
+  await wait(400);
+
+  log(`<span class="log-green">✓ file found</span> on disk`);
+  setNode('sn-disk', 'active-hit');
+  setArrow('sa-3', '');
+  await wait(300);
+
+  log(`<span class="log-blue">server</span> attaching headers: Cache-Control, Content-Type`);
+  await wait(400);
+
+  setNode('sn-server', 'active-hit');
+  setArrow('sa-2', '');
+  setNode('sn-cache', 'active-hit');
+  setArrow('sa-1', '');
+  setNode('sn-browser', 'active-hit');
+
+  log(`<span class="log-green">200 OK</span> <span class="log-dim">— response received and rendered</span>`);
+  if (cacheEnabled) log(`<span class="log-dim">copy stored in browser cache</span>`);
+  simRunning = false;
+}
+
+function resetSimNodes() {
+  ['sn-browser','sn-cache','sn-server','sn-disk'].forEach(id => setNode(id, ''));
+  ['sa-1','sa-2','sa-3'].forEach(id => setArrow(id, ''));
+}
+
+function resetSim() {
+  resetSimNodes();
+  document.getElementById('sim-log').innerHTML = '<span class="log-dim">// Hit "Send request" to simulate the lifecycle</span>';
+  simRunning = false;
+}
+
+// CACHE CONTROL EXPLORER
+const ccData = {
+  'max-age': {
+    header: 'Cache-Control: max-age=3600',
+    explain: '→ Cache this file. Treat as fresh for 3600 seconds (1 hour).\n→ After 1 hour, browser re-requests from server.\n→ Combine with public to also cache at CDN level.'
+  },
+  'no-cache': {
+    header: 'Cache-Control: no-cache',
+    explain: '→ Store the file, but always validate with server before using it.\n→ Server can respond 304 Not Modified (fast) or 200 with new content.\n→ Confusingly named — it DOES cache, just never trusts the copy blindly.'
+  },
+  'no-store': {
+    header: 'Cache-Control: no-store',
+    explain: '→ Never cache this anywhere. Not browser, not CDN, not proxies.\n→ Fresh request every single time.\n→ Use for: banking pages, private dashboards, sensitive data.'
+  },
+  'public': {
+    header: 'Cache-Control: public, max-age=86400',
+    explain: '→ Any cache (browser, CDN, proxy) is allowed to store this.\n→ Use for: JS bundles, CSS, images, fonts — anything static.\n→ Combine with fingerprinted filenames for safe long-term caching.'
+  },
+  'private': {
+    header: 'Cache-Control: private, max-age=3600',
+    explain: '→ Browser may cache this, but CDN/proxies must not.\n→ Use for: user-specific pages (dashboard, profile, cart).\n→ CDN would serve one user\'s page to another user — private prevents that.'
+  },
+  'stale': {
+    header: 'Cache-Control: max-age=60, stale-while-revalidate=300',
+    explain: '→ Serve the cached copy even if stale (for up to 300s).\n→ Simultaneously fetch a fresh copy in the background.\n→ User sees instant response. Next request gets the fresh version.'
+  }
+};
+
+function selectCC(key) {
+  document.querySelectorAll('.cc-option').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  const d = ccData[key];
+  document.getElementById('cc-preview').innerHTML =
+    `<span class="hl-green">${d.header}</span>\n\n<span class="hl-dim">${d.explain}</span>`;
+}
+
+// ORIGIN BUILDER
+const protos = ['https://', 'http://'];
+const domains = ['twitter.com', 'api.twitter.com', 'twitter.co.uk'];
+const ports = [':443', ':80', ':8080'];
+
+let protoIdx = 0, domainIdx = 0, portIdx = 0;
+
+function cycleProto() {
+  protoIdx = (protoIdx + 1) % protos.length;
+  document.getElementById('ob-proto').textContent = protos[protoIdx];
+  checkOrigin();
+}
+
+function cycleDomain() {
+  domainIdx = (domainIdx + 1) % domains.length;
+  document.getElementById('ob-domain').textContent = domains[domainIdx];
+  checkOrigin();
+}
+
+function cyclePort() {
+  portIdx = (portIdx + 1) % ports.length;
+  document.getElementById('ob-port').textContent = ports[portIdx];
+  checkOrigin();
+}
+
+function checkOrigin() {
+  const proto = protos[protoIdx];
+  const domain = domains[domainIdx];
+  const port = ports[portIdx];
+  const refProto = 'https://';
+  const refDomain = 'twitter.com';
+  const refPort = ':443';
+
+  const same = proto === refProto && domain === refDomain && port === refPort;
+  const mismatches = [];
+  if (proto !== refProto) mismatches.push('protocol');
+  if (domain !== refDomain) mismatches.push('domain');
+  if (port !== refPort) mismatches.push('port');
+
+  const res = document.getElementById('origin-result');
+  if (same) {
+    res.innerHTML = `<span class="badge badge-green">same origin</span> <span style="margin-left:0.75rem;color:var(--text2);font-size:12px">All three pieces match — browser allows cross-communication</span>`;
+  } else {
+    res.innerHTML = `<span class="badge badge-red">different origin</span> <span style="margin-left:0.75rem;color:var(--text2);font-size:12px">Mismatch: ${mismatches.join(', ')} — browser blocks cross-origin requests (unless CORS allows)</span>`;
+  }
+}
+
+// CACHE LAYERS
+function animateCacheLayers(hitAt) {
+  resetCacheLayers();
+  const layers = ['browser','cdn','server','db'];
+  const dots = ['dot-browser','dot-cdn','dot-server','dot-db'];
+  const tls = ['tl-browser','tl-cdn','tl-server','tl-db'];
+
+  layers.forEach((l, i) => {
+    const tl = document.getElementById('tl-'+l);
+    const dot = document.getElementById('dot-'+l);
+    setTimeout(() => {
+      if (i < hitAt) {
+        tl.className = 'tl-item done';
+        dot.className = 'status-dot warn';
+      } else if (i === hitAt) {
+        tl.className = 'tl-item current';
+        dot.className = 'status-dot on';
+      }
+    }, i * 300);
+  });
+}
+
+function resetCacheLayers() {
+  ['browser','cdn','server','db'].forEach(l => {
+    document.getElementById('tl-'+l).className = 'tl-item';
+  });
+  ['dot-browser','dot-cdn','dot-server','dot-db'].forEach(id => {
+    document.getElementById(id).className = 'status-dot';
+  });
+}
+
+// CDN SIMULATOR
+const cdnEdges = { atlanta: false, london: false, tokyo: false };
+const edgeNames = { atlanta: 'Atlanta edge', london: 'London edge', tokyo: 'Tokyo edge' };
+let cdnRunning = false;
+
+async function simulateCDN() {
+  if (cdnRunning) return;
+  cdnRunning = true;
+  const loc = document.getElementById('user-location').value;
+  const log = document.getElementById('cdn-log');
+  const edgeName = edgeNames[loc];
+
+  document.getElementById('cdn-edge-label').textContent = edgeName;
+  log.innerHTML = '';
+
+  function cdnLog(html) {
+    log.innerHTML += (log.innerHTML ? '\n' : '') + html;
+  }
+
+  const edgeCircle = document.getElementById('cdn-edge');
+  const l1 = document.getElementById('cdn-l1');
+  const l2 = document.getElementById('cdn-l2');
+  const origin = document.getElementById('cdn-origin');
+
+  edgeCircle.className = 'cdn-circle';
+  origin.className = 'cdn-circle';
+  l1.className = 'cdn-line'; l2.className = 'cdn-line';
+
+  cdnLog(`<span class="log-blue">user (${loc})</span> → requesting /logo.png`);
+  await wait(400);
+  l1.className = 'cdn-line active';
+  edgeCircle.className = 'cdn-circle active';
+
+  await wait(500);
+
+  if (cdnEdges[loc]) {
+    cdnLog(`<span class="log-green">✓ cache hit</span> at ${edgeName}`);
+    edgeCircle.className = 'cdn-circle warm';
+    l1.className = 'cdn-line cached';
+    cdnLog(`<span class="log-green">served in ~8ms</span> <span class="log-dim">— origin not touched</span>`);
+  } else {
+    cdnLog(`<span class="log-amber">cache miss</span> at ${edgeName} — forwarding to origin`);
+    l2.className = 'cdn-line active';
+    origin.className = 'cdn-circle active';
+    await wait(600);
+    cdnLog(`<span class="log-blue">origin server</span> responds with file + Cache-Control headers`);
+    await wait(400);
+    origin.className = 'cdn-circle';
+    l2.className = 'cdn-line';
+    edgeCircle.className = 'cdn-circle warm';
+    l1.className = 'cdn-line cached';
+    cdnEdges[loc] = true;
+    updateCDNStates();
+    cdnLog(`<span class="log-green">stored at ${edgeName}</span> — future requests served locally`);
+    cdnLog(`<span class="log-green">served in ~180ms</span> <span class="log-dim">(first time, had to hit origin)</span>`);
+  }
+
+  cdnRunning = false;
+}
+
+function warmCDN() {
+  Object.keys(cdnEdges).forEach(k => cdnEdges[k] = true);
+  updateCDNStates();
+  document.getElementById('cdn-log').innerHTML = '<span class="log-green">✓ all edge nodes warmed — next requests will be cache hits</span>';
+}
+
+function resetCDN() {
+  Object.keys(cdnEdges).forEach(k => cdnEdges[k] = false);
+  updateCDNStates();
+  document.getElementById('cdn-edge-label').textContent = 'Edge node';
+  document.getElementById('cdn-log').innerHTML = '<span class="log-dim">// CDN cache cleared — edges are cold again</span>';
+  ['cdn-edge','cdn-origin'].forEach(id => document.getElementById(id).className = 'cdn-circle');
+  ['cdn-l1','cdn-l2'].forEach(id => document.getElementById(id).className = 'cdn-line');
+  cdnRunning = false;
+}
+
+function updateCDNStates() {
+  Object.keys(cdnEdges).forEach(loc => {
+    const el = document.getElementById('cdn-' + loc + '-state');
+    if (cdnEdges[loc]) {
+      el.className = 'badge badge-green';
+      el.textContent = loc.charAt(0).toUpperCase() + loc.slice(1) + ': warm';
+    } else {
+      el.className = 'badge badge-red';
+      el.textContent = loc.charAt(0).toUpperCase() + loc.slice(1) + ': cold';
+    }
+  });
+}
+
+// DNS SIMULATOR
+const dnsMap = {
+  'twitter.com': '104.244.42.65',
+  'google.com': '142.250.80.46',
+  'github.com': '140.82.121.3',
+  'localhost': '127.0.0.1 (no DNS — hardcoded)',
+  'example.com': '93.184.216.34'
+};
+
+async function simulateDNS() {
+  const domain = document.getElementById('dns-input').value.trim().replace(/https?:\/\//,'');
+  const steps = ['dns-1','dns-2','dns-3','dns-4'];
+  steps.forEach(id => document.getElementById(id).className = 'tl-item');
+
+  const isLocal = domain === 'localhost';
+  const ip = dnsMap[domain] || `203.0.113.${Math.floor(Math.random()*200)+10}`;
+
+  document.getElementById('dns-desc-1').textContent = isLocal
+    ? 'localhost → hardcoded to 127.0.0.1 in OS hosts file. DNS never consulted.'
+    : `OS checks /etc/hosts and local resolver cache for "${domain}"`;
+
+  document.getElementById('dns-desc-2').textContent = isLocal
+    ? '(skipped — localhost resolves locally)'
+    : 'Local cache miss — asking ISP recursive resolver';
+
+  document.getElementById('dns-desc-3').textContent = isLocal
+    ? '(skipped)'
+    : `Root → .com TLD → authoritative nameserver for "${domain}"`;
+
+  document.getElementById('dns-desc-4').textContent = `${domain} → ${ip} — browser connects on port ${isLocal ? '8080' : '443'}`;
+
+  const stepsToShow = isLocal ? 1 : 4;
+  for (let i = 0; i < stepsToShow; i++) {
+    await wait(i * 350);
+    document.getElementById(steps[i]).className = 'tl-item ' + (i === stepsToShow - 1 ? 'current' : 'done');
+  }
+}
+</script>
+</body>
+</html>
